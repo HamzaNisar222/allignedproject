@@ -3,8 +3,10 @@ namespace App\Http\Controllers\api;
 
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Response;
 use App\Models\VendorServiceRegistration;
 use App\Http\Requests\VendorServiceRequest;
+use App\Http\Resources\RequestServiceResource;
 
 class ServiceRegistrationController extends Controller
 {
@@ -12,19 +14,14 @@ class ServiceRegistrationController extends Controller
     {
     }
 
-    public function create(VendorServiceRequest $request)
-    {
-        $response = VendorServiceRegistration::registerService($request);
-
-        // Check if the response is an error
-        if ($response instanceof \Illuminate\Http\JsonResponse && $response->status() == 409) {
-            return $response;
+    public function create(VendorServiceRequest $request) {
+        $existedRegistration = VendorServiceRegistration::existedRegistration($request);
+        if ($existedRegistration) {
+            return Response::error('Service Registration already exists either Pending or Approved', 409);
         }
-
-
-        return response()->json([
-            'message' => 'Service Registration submitted successfully'
-        ], 201);
+        $registrations = VendorServiceRegistration::createRegistration($request);
+        return new RequestServiceResource($registrations);
+        // return Response::success($registration, "Successfully Register the Request", 200);
     }
     /**
      * Approve a service registration.

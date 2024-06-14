@@ -29,38 +29,30 @@ class VendorServiceRegistration extends Model
         return $this->belongsTo(Service::class);
     }
 
-    public static function registerService($request)
-    {
-        // Check for duplicate service registration
-        if (
-            self::where('vendor_id', $request->user->id)
-                ->where('service_id', $request->service_id)
-                ->exists()
-        ) {
-            return response()->json([
-                'message' => 'Service Registration already exists for this user and service'
-            ], 409);
-        }
-        $documentPath = self::storeDocument($request->file('document_path'));
+    public static function existedRegistration($request) {
+        return self::where('vendor_id', $request->user->id)
+        ->where('service_id', $request->service_id)
+        ->whereIn('status', ['pending', 'approved'])->exists();
+    }
 
-
+    public static function createRegistration($request) {
+        $documentPath = $request->file('document_path')->store('documents');
         return self::create([
-            'vendor_id' => $request->user->id, // Use request->user() to get the authenticated user
+            'vendor_id' => $request->user->id,
             'service_id' => $request->service_id,
             'document_path' => $documentPath,
             'status' => 'pending',
         ]);
     }
 
-    private static function storeDocument($file)
-    {
-        // Generate a unique file name and move the file
-        $uniqueFileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('request_documents'), $uniqueFileName);
-
-        // Return the relative path to the file
-        return 'request_documents/' . $uniqueFileName;
+    public static function pending() {
+        return self::where('status', 'pending')->get();
     }
+
+    public static function approved() {
+        return self::where('status', 'approved')->get();
+    }
+
 
     /**
      * Approve the service registration.

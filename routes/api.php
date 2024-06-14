@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\SubServicesController;
 use App\Http\Controllers\Api\AdminServiceController;
+use App\Http\Controllers\api\VendorServiceController;
 use App\Http\Controllers\Api\ServiceRegistrationController;
 
 /*
@@ -63,4 +64,7 @@ Route::middleware(['auth.token', 'role:admin'])->prefix('admin')->group(function
 // Vendor routes (requires 'user' role)
 Route::middleware(['auth.token', 'role:user'])->group(function () {
     Route::post('/service-registrations', [ServiceRegistrationController::class, 'create']);
+
+    Route::get('/service-registrations/pending', [VendorServiceController::class, 'pending']);
+    Route::get('/service-registrations/approved', [VendorServiceController::class, 'approved']);
 });

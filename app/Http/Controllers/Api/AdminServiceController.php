@@ -51,7 +51,7 @@ class AdminServiceController extends Controller
      */
     public function userPending($userId)
     {
-        $registrations = VendorServiceRegistration::where('user_id', $userId)
+        $registrations = VendorServiceRegistration::where('vendor_id', $userId)
             ->where('status', 'pending')
             ->get();
 
@@ -66,7 +66,7 @@ class AdminServiceController extends Controller
      */
     public function userApproved($userId)
     {
-        $registrations = VendorServiceRegistration::where('user_id', $userId)
+        $registrations = VendorServiceRegistration::where('vendor_id', $userId)
             ->where('status', 'approved')
             ->get();
 
